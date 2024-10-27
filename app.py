@@ -1,6 +1,5 @@
 import sys
 import os
-import time
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QGridLayout, QLabel, QLineEdit, 
     QPushButton, QTextEdit, QScrollArea, QComboBox, QMainWindow, QStackedWidget
@@ -23,12 +22,10 @@ class ScrollableLabel(QScrollArea):
         self.chat_history.setWordWrap(True)
         self.layout.addWidget(self.chat_history)
 
-        self.scroll_to_point = QLabel()
-        self.layout.addWidget(self.scroll_to_point)
-
     def update_chat_history(self, message):
         self.chat_history.setText(self.chat_history.text() + '\n' + message)
         self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
+
 
 class ConnectPage(QWidget):
     def __init__(self, parent=None):
@@ -99,6 +96,7 @@ class InfoPage(QWidget):
 class ChatPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.users_online = {}  # Dictionary to store online users and their keys
         layout = QVBoxLayout(self)
         self.setLayout(layout)
 
@@ -123,11 +121,22 @@ class ChatPage(QWidget):
 
         if message:
             username = chat_app.connect_page.username.text()
-            self.history.update_chat_history(f'{username} > {message}')
-            socket_client.send(message, {'user': self.users_list.currentText(), 'key': ''})
+            recipient = self.users_list.currentText()
+            key = self.users_online.get(recipient, None)
+
+            if key:  # Check if a valid key is present for the selected user
+                self.history.update_chat_history(f'{username} > {message}')
+                socket_client.send(message, {'user': recipient, 'key': key})
+            else:
+                self.history.update_chat_history("Select a valid recipient.")
 
     def incoming_message(self, username, message):
-        self.history.update_chat_history(f'{username} > {message}')
+        if username == '__flag__':
+            self.users_online = eval(message)
+            self.users_list.clear()
+            self.users_list.addItems(self.users_online.keys())  # Update users list
+        else:
+            self.history.update_chat_history(f'{username} > {message}')
 
 
 class ChatApp(QMainWindow):
