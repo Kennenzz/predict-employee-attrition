@@ -1,0 +1,14 @@
+# Data Analyst Environment
+jupyter
+notebook
+pandas
+numpy
+matplotlib
+seaborn
+plotly
+openpyxl
+scikit-learn
+statsmodels
+sqlalchemy
+xgboost
+lightgbm
