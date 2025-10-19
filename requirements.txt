@@ -12,3 +12,8 @@ statsmodels
 sqlalchemy
 xgboost
 lightgbm
+pytorch_tabnet
+TensorFlow
+shap
+imblearn
+scipy
